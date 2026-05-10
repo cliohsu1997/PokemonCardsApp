@@ -72,6 +72,8 @@ Workflow and permissions live under `.cursor/rules/`:
 - **project-workflow.mdc** — This file
 - **job_seeking_webpage.cursorrules.mdc** — Archived reference from another project (`alwaysApply: false`)
 
+Optional **Cursor skills** (read when relevant) live in `.cursor/skills/` — copied from `job_seeking` on the Desktop (`compile-latex`, `polish-cv-resume`). `job_seeking_webpage` does not contain a `.cursor/skills` folder.
+
 ## Remote Repositories
 
 | Repository | Remote Name | Purpose | Stores |
