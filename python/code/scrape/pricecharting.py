@@ -70,6 +70,7 @@ def scrape_pricecharting_data(
         soup = BeautifulSoup(res.text, "html.parser")
     except Exception:
         _error("Error fetching category page.")
+        print("[scrape] Finished — category fetch failed.", flush=True)
         return ScrapeResult(pd.DataFrame(), False)
 
     set_links = soup.select('a[href^="/console/pokemon"]')
@@ -80,6 +81,7 @@ def scrape_pricecharting_data(
 
     n_planned = len(set_urls)
     if n_planned == 0:
+        print("[scrape] Finished — no set URLs after category parse.", flush=True)
         return ScrapeResult(pd.DataFrame(), False)
 
     is_full_run = max_sets is None
@@ -116,6 +118,12 @@ def scrape_pricecharting_data(
                             "Image_URL": img_url,
                         }
                     )
+                    n_raw = len(all_data)
+                    if n_raw > 0 and n_raw % 1000 == 0:
+                        print(
+                            f"[scrape] {n_raw:,} raw card rows scraped (every 1,000)…",
+                            flush=True,
+                        )
         except Exception as e:
             _warn(f"Error scraping {url}: {e}")
             continue
@@ -125,8 +133,15 @@ def scrape_pricecharting_data(
         if sleep_seconds > 0:
             time.sleep(sleep_seconds)
 
+    n_raw_total = len(all_data)
+    print(
+        f"[scrape] Set pages finished ({n_planned} URLs). Raw card rows: {n_raw_total:,}.",
+        flush=True,
+    )
+
     df = pd.DataFrame(all_data)
     if df.empty:
+        print("[scrape] Finished — no rows after parse (empty).", flush=True)
         return ScrapeResult(df, False)
 
     df["Card_Name_clean"] = df["Card_Name"].str.strip()
@@ -140,6 +155,11 @@ def scrape_pricecharting_data(
     df = df.drop(columns=["Card_Name_clean"])
 
     if df.empty:
+        print(
+            "[scrape] Finished — 0 rows after sealed-product filter "
+            f"(raw was {n_raw_total:,}).",
+            flush=True,
+        )
         return ScrapeResult(df, False)
 
     for col in ["Ungraded_Price", "Grade_9_Price", "PSA_10_Price"]:
@@ -149,4 +169,11 @@ def scrape_pricecharting_data(
     df["Set"] = df["Set"].str.replace("pokemon-", "", regex=False)
 
     ok_for_history = is_full_run and n_planned > 0 and not df.empty
+    n_kept = len(df)
+    print(
+        "[scrape] Finished — "
+        f"raw rows: {n_raw_total:,}; after sealed filter: {n_kept:,}. "
+        f"ok_for_history={ok_for_history}",
+        flush=True,
+    )
     return ScrapeResult(df, ok_for_history)
