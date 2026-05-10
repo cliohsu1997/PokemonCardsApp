@@ -1,0 +1,5 @@
+# Project-local Poetry settings (alongside pyproject.toml).
+# Creates the virtualenv at python/.venv/ instead of Poetry's global cache.
+
+[virtualenvs]
+in-project = true

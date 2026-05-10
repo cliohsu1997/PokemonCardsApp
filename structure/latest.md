@@ -8,21 +8,24 @@ High-level layout only. Update when folders or primary files change.
 |------|---------|
 | `streamlit_app.py` | Streamlit UI: scraping, filters, charts (starting point for SQL integration). |
 | `IMPLEMENTATION_PLAN.md` | Phase plan and status (authoritative). |
-| `.cursor/` | **Rules:** `project-workflow.mdc` (read order + pointers), `agent-permissions.mdc`. **Skills:** `skills/task-management-workflow/SKILL.md` (full task workflow), `skills/agent-permissions/SKILL.md` (git commit/push need chat approval). See `skills/README.md`. |
+| `.cursor/` | **Rules:** `project-workflow.mdc`, `agent-permissions.mdc`. **Skills:** `task-management-workflow`, `agent-permissions`, `python` (Poetry-only runs). See `skills/README.md`. |
 | `data/` | Empty placeholder for datasets and imports (tracked via `.gitkeep`). |
 | `debug/` | Empty placeholder for debug logs or scratch outputs (`.gitkeep`). |
 | `output/` | Empty placeholder for exports, reports, and generated files (`.gitkeep`). |
 
 ## Python (Poetry)
 
-Same pattern as `sports-card-automation/python`: dependency lock and venv are managed from **`python/`** only.
+All Python commands for this app use **`poetry run`** from **`python/`** (see `.cursor/skills/python/SKILL.md`).
 
 | Path | Purpose |
 |------|---------|
-| `python/pyproject.toml` | Poetry project metadata and runtime + dev dependencies. |
-| `python/poetry.lock` | Locked versions (commit this file). |
-| `python/README.md` | `poetry install` and `poetry run streamlit run ..\streamlit_app.py`. |
-| `python/tests/` | Placeholder for `pytest` (see `python/README.md`). |
+| `python/pyproject.toml` | Dependencies and project metadata. |
+| `python/poetry.lock` | Locked versions (commit). |
+| `python/poetry.toml` | **`virtualenvs.in-project = true`** → env at **`python/.venv/`** (gitignored). |
+| `python/README.md` | Setup and `poetry run` commands. |
+| `python/.venv/` | Poetry-created virtualenv (**not** committed). |
+| `python/code/` | Application scripts. |
+| `python/test/` | `pytest` (`poetry run pytest test\ -v`). |
 
 ## Workflow and tracking (per `project-workflow.mdc`)
 

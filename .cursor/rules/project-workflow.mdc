@@ -38,4 +38,5 @@ IMPLEMENTATION_PLAN.md
 ## Other rules and skills in this repo
 
 - **`agent-permissions.mdc`** — Web search and read-only git without prior chat approval; **`git commit`** and **`git push`** only after explicit user confirmation. Details: **`.cursor/skills/agent-permissions/SKILL.md`**
+- **`.cursor/skills/python/SKILL.md`** — Python layout, Poetry **`poetry run`**, in-project **`.venv`** (read when editing or running Python).
 - **`.cursor/skills/README.md`** — How optional skills are organized

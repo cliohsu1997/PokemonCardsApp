@@ -1,0 +1,10 @@
+# Poetry in-project env (see python/poetry.toml)
+python/.venv/
+
+__pycache__/
+*.py[cod]
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/

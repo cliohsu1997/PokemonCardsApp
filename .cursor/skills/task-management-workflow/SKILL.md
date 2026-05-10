@@ -94,13 +94,15 @@ When a task is complete:
 
 **IMPORTANT**: Do NOT automatically create new tasks after completing a task. Wait for explicit user instruction.
 
-## Testing Rule
+## Testing rule
 
-When the user says "test" or requests testing:
-1. **Run existing tests** - Execute test scripts from the `python/tests/` folder (e.g. `poetry run pytest` from `python/`)
-2. **Write test scripts** - Create new test files in the `python/tests/` folder
+When the user says **test** or requests testing:
 
-Always clarify with the user which action is intended, or do both if appropriate.
+1. **Run automated tests** — From **`python/`**, **`poetry run pytest test\ -v`** (tests under **`python/test/`**).
+2. **Add tests** — New files under **`python/test/`**. Always run pytest via **`poetry run`** (see **`.cursor/skills/python/SKILL.md`**).
+3. **Manual checks** — Optional: **`poetry run streamlit run ..\streamlit_app.py`** or scripts under **`python/code/`**.
+
+Clarify with the user which mix they want.
 
 ## Examples
 
