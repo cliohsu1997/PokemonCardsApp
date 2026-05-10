@@ -1,0 +1,95 @@
+"""PriceCharting.com Pokémon card table scrape."""
+
+from __future__ import annotations
+
+import time
+
+import pandas as pd
+import requests
+import streamlit as st
+from bs4 import BeautifulSoup
+
+from scrape.constants import SEALED_NAME_PATTERN
+
+
+def scrape_pricecharting_data() -> pd.DataFrame:
+    """Scrape category → per-set tables; return cleaned DataFrame (same columns as before)."""
+    base_url = "https://www.pricecharting.com"
+    category_url = f"{base_url}/category/pokemon-cards"
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    try:
+        res = requests.get(category_url, headers=headers, timeout=60)
+        soup = BeautifulSoup(res.text, "html.parser")
+    except Exception:
+        st.error("Error fetching category page.")
+        return pd.DataFrame()
+
+    set_links = soup.select('a[href^="/console/pokemon"]')
+    set_urls = list({base_url + link["href"] for link in set_links})
+    set_urls = [url for url in set_urls if "japanese" not in url.lower()]
+
+    all_data: list[dict] = []
+    progress = st.progress(0)
+
+    for i, url in enumerate(set_urls):
+        try:
+            sorted_url = f"{url}?sort=highest-price"
+            res = requests.get(sorted_url, headers=headers, timeout=60)
+            soup = BeautifulSoup(res.text, "html.parser")
+            rows = soup.select("table tr")
+            for row in rows:
+                cols = row.find_all("td")
+                if len(cols) >= 5:
+                    img_tag = cols[0].find("img")
+                    if img_tag and "src" in img_tag.attrs:
+                        img_url = img_tag["src"]
+                    else:
+                        img_url = ""
+
+                    name = cols[1].text.strip()
+                    ungraded = cols[2].text.strip().replace("$", "").replace(",", "")
+                    grade9 = cols[3].text.strip().replace("$", "").replace(",", "")
+                    psa10 = cols[4].text.strip().replace("$", "").replace(",", "")
+
+                    all_data.append(
+                        {
+                            "Set": url.split("/")[-1],
+                            "Card_Name": name,
+                            "Ungraded_Price": ungraded,
+                            "Grade_9_Price": grade9,
+                            "PSA_10_Price": psa10,
+                            "Image_URL": img_url,
+                        }
+                    )
+        except Exception as e:
+            st.warning(f"Error scraping {url}: {e}")
+            continue
+
+        progress.progress((i + 1) / len(set_urls))
+        time.sleep(0.3)
+
+    df = pd.DataFrame(all_data)
+    if df.empty:
+        return df
+
+    df["Card_Name_clean"] = df["Card_Name"].str.strip()
+    df = df[
+        ~df["Card_Name_clean"].str.contains(
+            SEALED_NAME_PATTERN,
+            case=False,
+            na=False,
+        )
+    ]
+    df = df.drop(columns=["Card_Name_clean"])
+
+    if df.empty:
+        return df
+
+    for col in ["Ungraded_Price", "Grade_9_Price", "PSA_10_Price"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    df["Deal_Value"] = df["Grade_9_Price"] - df["Ungraded_Price"]
+    df["Set"] = df["Set"].str.replace("pokemon-", "", regex=False)
+
+    return df

@@ -1,3 +1,6 @@
+import sys
+from pathlib import Path
+
 import streamlit as st         # for the web app
 import pandas as pd             # for DataFrame manipulation
 import os                       # to access environment variables (HF_TOKEN)
@@ -5,9 +8,6 @@ from typing import Optional, List  # for your HFInferenceLLM type hints
 from pydantic import Field      # for your HFInferenceLLM class
 from langchain.llms.base import LLM  # base class for your HFInferenceLLM
 from huggingface_hub import InferenceClient  # to call Hugging Face API
-import time                     # for sleep between requests
-import requests                 # for HTTP requests
-from bs4 import BeautifulSoup   # for HTML parsing
 from datetime import datetime   # for timestamps
 from zoneinfo import ZoneInfo   # for timezone-aware timestamps
 from langchain.agents import create_pandas_dataframe_agent
@@ -16,16 +16,12 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 import plotly.express as px
 
+# Local scrape package (run Streamlit from repo root so paths resolve)
+_CODE_ROOT = Path(__file__).resolve().parent / "python" / "code"
+if str(_CODE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CODE_ROOT))
 
-# --------------------------
-# Define sealed product keywords globally (used across scraping and filtering)
-# --------------------------
-sealed_keywords = [
-    "booster pack","booster box","elite trainer box","etb","display box",
-    "factory sealed","blister","theme deck","starter deck","pokemon tin",
-    "promo set","bundle","collection"
-]
-pattern = '|'.join(sealed_keywords)
+from scrape import SEALED_NAME_PATTERN, scrape_pricecharting_data
 
 
 # --------------------------
@@ -155,99 +151,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-# --------------------------
-#Scraping Logic
-
-
-def scrape_pricecharting_data():
-    BASE_URL = "https://www.pricecharting.com"
-    CATEGORY_URL = f"{BASE_URL}/category/pokemon-cards"
-    headers = {"User-Agent": "Mozilla/5.0"}
-
-    try:
-        res = requests.get(CATEGORY_URL, headers=headers)
-        soup = BeautifulSoup(res.text, 'html.parser')
-    except Exception as e:
-        st.error("Error fetching category page.")
-        return pd.DataFrame()
-
-    # Get all set links
-    set_links = soup.select('a[href^="/console/pokemon"]')
-    set_urls = list(set(BASE_URL + link["href"] for link in set_links))
-
-    # Remove Japanese sets for now. Scrape takes too long otherwise
-    set_urls = [url for url in set_urls if "japanese" not in url.lower()]
-
-    all_data = []
-
-    progress = st.progress(0)
-    for i, url in enumerate(set_urls):
-        try:
-            sorted_url = f"{url}?sort=highest-price"
-            res = requests.get(sorted_url, headers=headers)
-            soup = BeautifulSoup(res.text, 'html.parser')
-            rows = soup.select('table tr')
-            for row in rows:
-                cols = row.find_all('td')
-                if len(cols) >= 5:
-                    img_tag = cols[0].find("img")
-
-                    if img_tag and "src" in img_tag.attrs:
-                        img_url = img_tag["src"]
-                    else:
-                        img_url = ""
-
-                    name = cols[1].text.strip()
-                    ungraded = cols[2].text.strip().replace("$", "").replace(",", "")
-                    grade9 = cols[3].text.strip().replace("$", "").replace(",", "")
-                    psa10 = cols[4].text.strip().replace("$", "").replace(",", "")
-
-                    all_data.append({
-                        "Set": url.split('/')[-1],
-                        "Card_Name": name,
-                        "Ungraded_Price": ungraded,
-                        "Grade_9_Price": grade9,
-                        "PSA_10_Price": psa10,
-                        "Image_URL": img_url
-
-                    })
-
-        except Exception as e:
-            st.warning(f"Error scraping {url}: {e}")
-            continue
-
-        progress.progress((i + 1) / len(set_urls))
-        time.sleep(0.3)
-
-   
-    df = pd.DataFrame(all_data)
-
-    if df.empty:
-        return df 
-    
-    df["Card_Name_clean"] = df["Card_Name"].str.strip()
-
-    # Remove rows where Card_Name matches sealed products
-    df = df[~df["Card_Name_clean"].str.contains(pattern, case=False, na=False)]
-    df = df.drop(columns=["Card_Name_clean"])
-
-    
-    if df.empty:
-        return df
-
-    # Ensure correct column types
-    for col in ["Ungraded_Price", "Grade_9_Price", "PSA_10_Price"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
-
-    df["Deal_Value"] = df["Grade_9_Price"] - df["Ungraded_Price"]
-    df["Set"] = df["Set"].str.replace("pokemon-", "", regex=False)
-
-
-
-    return df
-
-
-
 # --------------------------
 @st.cache_data
 def load_data():
@@ -410,7 +313,10 @@ if (
     and "Card_Name" in history_df.columns
 ):
     history_df = history_df[
-        ~history_df["Card_Name"].str.lower().str.contains(pattern, na=False)
+        ~history_df["Card_Name"].str.lower().str.contains(
+            SEALED_NAME_PATTERN,
+            na=False,
+        )
     ]
 
 # Work with full history + keep latest snapshot separate
@@ -470,7 +376,10 @@ latest_with_changes = latest_with_changes.loc[:, ~latest_with_changes.columns.du
 
 if not latest_with_changes.empty and "Card_Name" in latest_with_changes.columns:
     latest_with_changes = latest_with_changes[
-        ~latest_with_changes["Card_Name"].str.lower().str.contains(pattern, na=False)
+        ~latest_with_changes["Card_Name"].str.lower().str.contains(
+            SEALED_NAME_PATTERN,
+            na=False,
+        )
     ]
 
 
