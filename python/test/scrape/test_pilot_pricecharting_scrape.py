@@ -28,6 +28,7 @@ def test_scrape_pricecharting_real_site_limited_sets() -> None:
     expected_cols = {
         "Set",
         "Card_Name",
+        "Product_URL",
         "Ungraded_Price",
         "Grade_9_Price",
         "PSA_10_Price",

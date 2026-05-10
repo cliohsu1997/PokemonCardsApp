@@ -103,7 +103,20 @@ def scrape_pricecharting_data(
                     else:
                         img_url = ""
 
-                    name = cols[1].text.strip()
+                    name_td = cols[1]
+                    name = name_td.get_text(strip=True)
+                    link = name_td.find("a", href=True)
+                    if link and link.get("href"):
+                        href = str(link["href"]).strip()
+                        if href.startswith("http://") or href.startswith("https://"):
+                            product_url = href
+                        elif href.startswith("/"):
+                            product_url = f"{base_url}{href}"
+                        else:
+                            product_url = f"{base_url}/{href}"
+                    else:
+                        product_url = ""
+
                     ungraded = cols[2].text.strip().replace("$", "").replace(",", "")
                     grade9 = cols[3].text.strip().replace("$", "").replace(",", "")
                     psa10 = cols[4].text.strip().replace("$", "").replace(",", "")
@@ -112,6 +125,7 @@ def scrape_pricecharting_data(
                         {
                             "Set": url.split("/")[-1],
                             "Card_Name": name,
+                            "Product_URL": product_url,
                             "Ungraded_Price": ungraded,
                             "Grade_9_Price": grade9,
                             "PSA_10_Price": psa10,

@@ -21,59 +21,12 @@ _CODE_ROOT = Path(__file__).resolve().parent / "python" / "code"
 if str(_CODE_ROOT) not in sys.path:
     sys.path.insert(0, str(_CODE_ROOT))
 
-from scrape import SEALED_NAME_PATTERN, ScrapeResult, scrape_pricecharting_data
-
-
-# --------------------------
-# Local data files (no cloud storage — aligns with SQLite migration in IMPLEMENTATION_PLAN.md)
-# --------------------------
-HISTORY_CSV_PATH = "data/pokemon_price_history.csv"
-LATEST_CSV_PATH = "data/latest_pokemon_prices.csv"
-
-
-def persist_scrape_output(result: ScrapeResult, today: str) -> None:
-    """Always write ``latest`` CSV. Append to ``history`` only if run is history-complete,
-    there is at least one row, and ``today`` is not already present in history."""
-    os.makedirs("data", exist_ok=True)
-    df = result.df
-    if df.empty:
-        latest_out = pd.DataFrame(
-            columns=[
-                "Set",
-                "Card_Name",
-                "Ungraded_Price",
-                "Grade_9_Price",
-                "PSA_10_Price",
-                "Image_URL",
-                "Deal_Value",
-                "Date",
-            ]
-        )
-    else:
-        latest_out = df.copy()
-        latest_out["Date"] = today
-    latest_out.to_csv(LATEST_CSV_PATH, index=False)
-
-    if not result.ok_for_history or result.df.empty:
-        return
-
-    try:
-        old = (
-            pd.read_csv(HISTORY_CSV_PATH)
-            if os.path.isfile(HISTORY_CSV_PATH)
-            else pd.DataFrame()
-        )
-    except Exception:
-        old = pd.DataFrame()
-
-    if old.empty:
-        combined = latest_out
-    elif "Date" in old.columns and today not in old["Date"].astype(str).values:
-        combined = pd.concat([old, latest_out], ignore_index=True)
-    else:
-        return
-
-    combined.to_csv(HISTORY_CSV_PATH, index=False)
+from scrape import SEALED_NAME_PATTERN, scrape_pricecharting_data
+from scrape.persist import (
+    HISTORY_CSV_PATH,
+    LATEST_CSV_PATH,
+    persist_scrape_output,
+)
 
 
 # --------------------------
@@ -201,7 +154,15 @@ st.markdown(
 @st.cache_data
 def load_data():
     file_path = LATEST_CSV_PATH
-    expected_cols = {"Set", "Card_Name", "Ungraded_Price", "Grade_9_Price", "PSA_10_Price", "Image_URL"}
+    expected_cols = {
+        "Set",
+        "Card_Name",
+        "Product_URL",
+        "Ungraded_Price",
+        "Grade_9_Price",
+        "PSA_10_Price",
+        "Image_URL",
+    }
 
     if not os.path.exists(file_path):
         return pd.DataFrame()
