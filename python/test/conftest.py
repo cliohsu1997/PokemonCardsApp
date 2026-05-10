@@ -1,4 +1,4 @@
-"""Ensure ``python/code`` is on ``sys.path`` for tests under ``python/test/``."""
+"""Ensure ``python/code`` is on ``sys.path`` for tests under ``python/test/`` (including ``test/scrape/``)."""
 
 from __future__ import annotations
 
