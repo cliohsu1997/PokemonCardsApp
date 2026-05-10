@@ -88,18 +88,34 @@ So: **one conceptual “engine,”** several **doors** into it (CLI exe, Python,
 
 ---
 
-## 6. Minimal SQL shape (structure of the language)
+## 6. The “shape” of SQL (structure of the language)
 
-Rough buckets beginners hit first:
+People say **“shape”** here in a **metaphorical** sense—not geometry. They mean:
 
-| Bucket | Examples | Role |
-|--------|-----------|------|
-| **DDL** (Data Definition Language) | `CREATE TABLE`, `ALTER TABLE`, `DROP TABLE`, `CREATE INDEX` | Define **structure**. |
-| **DML** (Data Manipulation Language) | `INSERT`, `UPDATE`, `DELETE` | Change **rows**. |
-| **Query** | `SELECT ... FROM ... WHERE ... JOIN ... GROUP BY ...` | **Read** and summarize. |
-| **Transactions** (later) | `BEGIN`, `COMMIT`, `ROLLBACK` | Group changes safely. |
+- **What kind of sentence is this?** (define tables vs insert rows vs ask a question vs wrap a transaction.)
+- **What slots does the grammar expect?** A `SELECT` usually has a **fixed order of clauses** (`SELECT` → `FROM` → `WHERE` → `GROUP BY` → …). That repeating skeleton is the **“shape”** of a query—like a form you fill in.
+
+So **“shape” = categories + clause patterns**, not “SQL looks like a triangle.”
+
+### Categories (buckets beginners use first)
+
+| Bucket | Common name | Examples | Role |
+|--------|-------------|----------|------|
+| **DDL** | Data Definition Language | `CREATE TABLE`, `ALTER TABLE`, `DROP TABLE`, `CREATE INDEX` | Define **structure** (empty drawers + labels). |
+| **DML** | Data Manipulation Language | `INSERT`, `UPDATE`, `DELETE` | Change **rows** inside those drawers. |
+| **DQL** | Data Query Language (informal; often taught with `SELECT`) | `SELECT … FROM … WHERE … JOIN … GROUP BY …` | **Read** and summarize without changing stored data (unless you use `INSERT`…`SELECT`, etc.). |
+| **TCL** (later) | Transaction Control | `BEGIN`, `COMMIT`, `ROLLBACK` | Group changes **safely** (all-or-nothing). |
 
 You don’t need every keyword at once—**CREATE**, **INSERT**, **SELECT**, **WHERE**, **JOIN**, **GROUP BY** carry most learning projects.
+
+### Same idea in one English question
+
+| You think in English | SQL “shape” |
+|----------------------|-------------|
+| “What columns, from which table, only rows that match a condition?” | `SELECT` *columns* `FROM` *table* `WHERE` *condition* |
+| “Average price per set?” | `SELECT` set, `AVG(price)` `FROM` … `GROUP BY` set |
+
+The **words change**; the **clause order** and **intent** stay recognizable—that is what teachers mean by **structure** or **shape**.
 
 ---
 
@@ -116,6 +132,43 @@ You don’t need every keyword at once—**CREATE**, **INSERT**, **SELECT**, **W
 ## 8. Optional GUI
 
 **DB Browser for SQLite** is a free desktop app to open a `.db`, browse tables, run `SELECT`, without writing Python—good for learning alongside this repo.
+
+---
+
+## 9. Worked example (tiny Pokémon-style data)
+
+Imagine you already opened (or created) a SQLite file **`data/example.db`**. Running these statements **in order** shows the full mini-pipeline: **DDL → DML → DQL**.
+
+```sql
+-- 1) DDL: declare a table (structure only; no rows yet)
+CREATE TABLE IF NOT EXISTS card_prices (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    set_name    TEXT    NOT NULL,
+    card_name   TEXT    NOT NULL,
+    ungraded_usd REAL   NOT NULL,
+    price_date  TEXT    NOT NULL   -- ISO date string, e.g. '2026-05-10'
+);
+
+-- 2) DML: put rows in (two fake cards on one day)
+INSERT INTO card_prices (set_name, card_name, ungraded_usd, price_date)
+VALUES
+    ('fusion-strike', 'Mew VMAX', 12.50, '2026-05-10'),
+    ('fusion-strike', 'Genesect V', 4.00, '2026-05-10');
+
+-- 3) DQL: ask a question (read-only)
+SELECT card_name, ungraded_usd
+FROM card_prices
+WHERE set_name = 'fusion-strike'
+ORDER BY ungraded_usd DESC;
+```
+
+**What you should notice**
+
+1. **`CREATE TABLE`** names columns and types—that is your **contract** with SQLite.
+2. **`INSERT`** adds facts; run it twice and you get **more rows**, same shape.
+3. **`SELECT … FROM … WHERE … ORDER BY`** is the classic **question shape**: which columns, which table, which subset, which sort.
+
+Your real app will have **more tables** (`sets`, `cards`, `snapshots`) and **JOINs**; the **clause shapes** stay the same idea, just longer.
 
 ---
 

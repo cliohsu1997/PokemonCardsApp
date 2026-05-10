@@ -172,17 +172,29 @@ Around this:
 </ol>
 <p>CSV stays useful for backup and Excel; <code>.db</code> is what the app queries efficiently.</p>
 
-<h2>6. Shape of the SQL language</h2>
+<h2>6. The “shape” of SQL</h2>
+<p><strong>“Shape” is a metaphor</strong> — not geometry. It means: <em>what kind of statement is this?</em> (define tables vs insert rows vs ask a question) and <em>what clause order does the grammar expect?</em> A <code>SELECT</code> has a familiar skeleton (<code>SELECT</code> → <code>FROM</code> → <code>WHERE</code> → …). That repeating skeleton is the “shape” of a query — like a form you fill in.</p>
+
+<h3>Categories (buckets)</h3>
 <table>
-  <thead><tr><th>Bucket</th><th>Examples</th><th>Role</th></tr></thead>
+  <thead><tr><th>Bucket</th><th>Name</th><th>Examples</th><th>Role</th></tr></thead>
   <tbody>
-    <tr><td>DDL</td><td><code>CREATE TABLE</code>, <code>ALTER</code>, <code>DROP</code>, <code>CREATE INDEX</code></td><td>Define structure.</td></tr>
-    <tr><td>DML</td><td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td><td>Change rows.</td></tr>
-    <tr><td>Query</td><td><code>SELECT … FROM … WHERE … JOIN … GROUP BY …</code></td><td>Read and summarize.</td></tr>
-    <tr><td>Transactions</td><td><code>BEGIN</code>, <code>COMMIT</code>, <code>ROLLBACK</code></td><td>Group changes safely (later).</td></tr>
+    <tr><td>DDL</td><td>Data Definition</td><td><code>CREATE TABLE</code>, <code>ALTER</code>, <code>DROP</code>, <code>CREATE INDEX</code></td><td>Define structure (empty drawers + labels).</td></tr>
+    <tr><td>DML</td><td>Data Manipulation</td><td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td><td>Change rows inside those drawers.</td></tr>
+    <tr><td>DQL</td><td>Data Query (informal)</td><td><code>SELECT … FROM … WHERE … JOIN … GROUP BY …</code></td><td>Read and summarize (classic “question” shape).</td></tr>
+    <tr><td>TCL</td><td>Transaction control</td><td><code>BEGIN</code>, <code>COMMIT</code>, <code>ROLLBACK</code></td><td>Group changes safely (later).</td></tr>
   </tbody>
 </table>
 <p><strong>CREATE</strong>, <strong>INSERT</strong>, <strong>SELECT</strong>, <strong>WHERE</strong>, <strong>JOIN</strong>, <strong>GROUP BY</strong> cover most learning projects.</p>
+
+<h3>English → SQL “shape”</h3>
+<table>
+  <thead><tr><th>You think in English</th><th>SQL shape</th></tr></thead>
+  <tbody>
+    <tr><td>Which columns, from which table, only rows that match?</td><td><code>SELECT</code> … <code>FROM</code> … <code>WHERE</code> …</td></tr>
+    <tr><td>Average price per set?</td><td><code>SELECT</code> set, <code>AVG(price)</code> <code>FROM</code> … <code>GROUP BY</code> set</td></tr>
+  </tbody>
+</table>
 
 <h2>7. This Pokémon project</h2>
 <table>
@@ -196,6 +208,35 @@ Around this:
 
 <h2>8. Optional GUI</h2>
 <p><strong>DB Browser for SQLite</strong> — free desktop app to open a <code>.db</code>, browse tables, run <code>SELECT</code>, without Python.</p>
+
+<h2>9. Worked example (tiny Pokémon-style data)</h2>
+<p>After opening or creating <code>data/example.db</code>, run these in order: <strong>DDL → DML → DQL</strong>.</p>
+<pre class="diagram">-- 1) DDL: declare a table (structure only; no rows yet)
+CREATE TABLE IF NOT EXISTS card_prices (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    set_name        TEXT    NOT NULL,
+    card_name       TEXT    NOT NULL,
+    ungraded_usd    REAL    NOT NULL,
+    price_date      TEXT    NOT NULL
+);
+
+-- 2) DML: insert two fake cards on one day
+INSERT INTO card_prices (set_name, card_name, ungraded_usd, price_date)
+VALUES
+    ('fusion-strike', 'Mew VMAX', 12.50, '2026-05-10'),
+    ('fusion-strike', 'Genesect V', 4.00, '2026-05-10');
+
+-- 3) DQL: ask a question (read-only)
+SELECT card_name, ungraded_usd
+FROM card_prices
+WHERE set_name = 'fusion-strike'
+ORDER BY ungraded_usd DESC;</pre>
+<ol>
+  <li><code>CREATE TABLE</code> — column names and types = your <strong>contract</strong> with SQLite.</li>
+  <li><code>INSERT</code> — adds facts; repeat for more rows, same shape.</li>
+  <li><code>SELECT … FROM … WHERE … ORDER BY</code> — classic <strong>question</strong> shape: columns, table, filter, sort.</li>
+</ol>
+<p>Your real schema may use more tables (<code>sets</code>, <code>cards</code>, <code>snapshots</code>) and <code>JOIN</code>s; the <strong>clause shapes</strong> stay the same idea.</p>
 
 <hr>
 
