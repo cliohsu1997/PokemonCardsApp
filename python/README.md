@@ -62,4 +62,4 @@ poetry run pytest test\ -v
 
 ## Notes
 
-- Google Cloud and Hugging Face features in `streamlit_app.py` expect credentials or env vars as in the upstream project.
+- Hugging Face–related imports in `streamlit_app.py` may expect **`HF_TOKEN`** (or similar) if you enable those features.

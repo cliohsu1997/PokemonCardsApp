@@ -1,6 +1,9 @@
 # Poetry in-project env (see python/poetry.toml)
 python/.venv/
 
+# Streamlit scrape outputs (local only)
+data/*.csv
+
 __pycache__/
 *.py[cod]
 .Python

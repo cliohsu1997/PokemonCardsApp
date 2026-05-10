@@ -10,9 +10,6 @@ import requests                 # for HTTP requests
 from bs4 import BeautifulSoup   # for HTML parsing
 from datetime import datetime   # for timestamps
 from zoneinfo import ZoneInfo   # for timezone-aware timestamps
-from google.cloud import storage
-import json
-from io import BytesIO
 from langchain.agents import create_pandas_dataframe_agent
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
@@ -32,20 +29,9 @@ pattern = '|'.join(sealed_keywords)
 
 
 # --------------------------
-# Google Cloud Storage Setup
+# Local data files (no cloud storage — aligns with SQLite migration in IMPLEMENTATION_PLAN.md)
 # --------------------------
-from google.oauth2 import service_account
-
-# Load service account JSON from Streamlit secrets
-gcp_credentials = service_account.Credentials.from_service_account_info(
-    json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
-)
-
-# Initialize client
-storage_client = storage.Client(credentials=gcp_credentials)
-
-# Set your bucket name
-BUCKET_NAME = "pokemon-price-history-data" 
+HISTORY_CSV_PATH = "data/pokemon_price_history.csv"
 
 
 # --------------------------
@@ -324,32 +310,28 @@ if st.button("Refresh Price Data"):
             df_scraped["Date"] = today
 
             # --------------------------
-            # Save/update growing history file on Google Cloud Storage
+            # Merge into local growing history CSV
             # --------------------------
-            bucket = storage_client.bucket(BUCKET_NAME)
-            blob = bucket.blob("pokemon_price_history.csv")
-
-            # Try to load old data from GCS
+            os.makedirs("data", exist_ok=True)
             try:
-                old_data = blob.download_as_bytes()
-                old = pd.read_csv(BytesIO(old_data))
+                if os.path.isfile(HISTORY_CSV_PATH):
+                    old = pd.read_csv(HISTORY_CSV_PATH)
+                else:
+                    old = pd.DataFrame()
             except Exception:
                 old = pd.DataFrame()
 
-            # Combine if new date not already included
             if old.empty:
                 combined = df_scraped
             elif today not in old["Date"].astype(str).values:
                 combined = pd.concat([old, df_scraped], ignore_index=True)
             else:
-                combined = old  # keep full history if today's data already exists
+                combined = old
 
-            # Upload updated file back to GCS
-            csv_buffer = BytesIO()
-            combined.to_csv(csv_buffer, index=False)
-            blob.upload_from_file(csv_buffer, content_type="text/csv", rewind=True)
+            combined.to_csv(HISTORY_CSV_PATH, index=False)
+            df_scraped.to_csv("data/latest_pokemon_prices.csv", index=False)
 
-            st.success("✅ Data refreshed and uploaded to cloud!")
+            st.success("✅ Data refreshed and saved under data/.")
             df = df_scraped  # keep this line
 
         else:
@@ -414,17 +396,22 @@ for col in price_cols:
 def convert_df_to_csv(df):
     return df.to_csv(index=False).encode("utf-8")
 
-bucket = storage_client.bucket(BUCKET_NAME)
-blob = bucket.blob("pokemon_price_history.csv")
 try:
-    data = blob.download_as_bytes()
-    history_df = pd.read_csv(BytesIO(data))
-    st.success("")
-except Exception as e:
-    st.warning("Cloud history unavailable right now.")
+    if os.path.isfile(HISTORY_CSV_PATH):
+        history_df = pd.read_csv(HISTORY_CSV_PATH)
+    else:
+        history_df = pd.DataFrame()
+except Exception:
+    st.warning("Could not read local price history (data/pokemon_price_history.csv).")
     history_df = pd.DataFrame()
 
-history_df = history_df[~history_df["Card_Name"].str.lower().str.contains(pattern, na=False)]
+if (
+    not history_df.empty
+    and "Card_Name" in history_df.columns
+):
+    history_df = history_df[
+        ~history_df["Card_Name"].str.lower().str.contains(pattern, na=False)
+    ]
 
 # Work with full history + keep latest snapshot separate
 if not history_df.empty:
