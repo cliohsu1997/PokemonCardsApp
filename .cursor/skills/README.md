@@ -1,7 +1,10 @@
 # Cursor skills (optional)
 
-Add subfolders under `.cursor/skills/` with a `SKILL.md` file when you want repo-local [Cursor Agent Skills](https://docs.cursor.com/context/skills) for this project.
+Add subfolders under `.cursor/skills/` with a `SKILL.md` file when you want repo-local [Cursor Agent Skills](https://docs.cursor.com/context/skills).
 
-**Project and task workflow** for this repository are defined in `.cursor/rules/project-workflow.mdc` (rules), not in this folder.
+**Bundled skills for this repository**
 
-**Not included here:** LaTeX (`compile-latex`) and CV polish (`polish-cv-resume`) skills were removed on purpose; add your own `SKILL.md` trees if you need those workflows again.
+- **`task-management-workflow/SKILL.md`** — Proposals, to-dos, summaries, progress, updates, testing (authoritative task workflow; read in full each conversation per `project-workflow.mdc`).
+- **`agent-permissions/SKILL.md`** — When to ask before `git commit` / `git push`; web search without extra approval. (Short form also in `.cursor/rules/agent-permissions.mdc`.)
+
+**Project overview** beyond tasks: **`.cursor/rules/project-workflow.mdc`**.

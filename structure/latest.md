@@ -8,7 +8,7 @@ High-level layout only. Update when folders or primary files change.
 |------|---------|
 | `streamlit_app.py` | Streamlit UI: scraping, filters, charts (starting point for SQL integration). |
 | `IMPLEMENTATION_PLAN.md` | Phase plan and status (authoritative). |
-| `.cursor/` | **Rules** (`rules/*.mdc`): `project-workflow.mdc`, `agent-permissions.mdc`. **Skills** (`skills/`): optional `SKILL.md` subfolders only; LaTeX/CV skills were removed; see `skills/README.md`. |
+| `.cursor/` | **Rules:** `project-workflow.mdc` (read order + pointers), `agent-permissions.mdc`. **Skills:** `skills/task-management-workflow/SKILL.md` (full task workflow), `skills/agent-permissions/SKILL.md` (git commit/push need chat approval). See `skills/README.md`. |
 | `data/` | Empty placeholder for datasets and imports (tracked via `.gitkeep`). |
 | `debug/` | Empty placeholder for debug logs or scratch outputs (`.gitkeep`). |
 | `output/` | Empty placeholder for exports, reports, and generated files (`.gitkeep`). |

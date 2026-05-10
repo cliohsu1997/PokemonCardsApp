@@ -1,15 +1,29 @@
 ---
-description: Agent permissions for this project – web search and git read
+description: >-
+  Agent permissions: web search and read-only git without prior approval; git
+  commit and git push only after explicit user confirmation in chat.
 alwaysApply: true
 ---
 
-# Agent Permissions
+# Agent permissions
 
-When working on this project, you have permission to:
+## Allowed without asking first
 
-1. **Search the internet** – Use web search when you need up-to-date information, docs, or external references. Prefer this when the codebase or training data is insufficient.
+1. **Search the internet** — Use web search when you need up-to-date information, docs, or external references. No separate permission step in chat.
 
-2. **Read git** – Read git state as needed: `git status`, `git log`, `git diff`, `git remote -v`, branch names, and other read-only git commands to understand repo state and history.
+2. **Read-only git** — e.g. `git status`, `git log`, `git diff`, `git remote -v`, branch lists, to understand repo state and history.
 
-Use these when they help complete the user’s request. Do not perform destructive git operations (e.g. force push, hard reset) unless the user explicitly asks.
+## Require explicit user confirmation in chat first
 
+Do **not** run until the user clearly approves in the conversation (e.g. “yes, commit and push”):
+
+- **`git commit`** (any form)
+- **`git push`** (any remote or branch)
+
+If the user has not confirmed, **stop before** these commands, summarize what you would commit/push, and ask once.
+
+## Other git
+
+Do **not** perform destructive git (force push, hard reset, etc.) unless the user explicitly asks for that operation.
+
+Details and examples: **`.cursor/skills/agent-permissions/SKILL.md`**.
