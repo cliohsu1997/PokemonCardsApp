@@ -6,6 +6,7 @@
 
 ## Completed
 
+- **pilot_validate_pricecharting_scrape** — Pytest pilots for `scrape`: live category probe + mocked `scrape_pricecharting_data()`; all passed (`python/test/`).
 - **initialize_project_workflow** — Workflow folders and docs added; upstream extras removed; optional header images in `streamlit_app.py`.
 - **add_python_poetry_env** — Added `python/` with Poetry, `code/`, `test/`, in-project `.venv` via `poetry.toml`, etc.
 

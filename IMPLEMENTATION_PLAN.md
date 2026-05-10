@@ -11,6 +11,7 @@ Single source of truth for phases and status. Update this file first when phases
 
 - Align repo with `.cursor/rules/project-workflow.mdc` (folders, tracking docs).
 - Keep `streamlit_app.py` as the starting UI reference; Poetry layout under `python/` (`pyproject.toml`, `poetry.toml`, in-project `.venv`, `code/`, `test/`).
+- **Scrape pilot tests:** `python/test/test_pilot_pricecharting_scrape.py` — live category-page probe plus mocked `scrape_pricecharting_data()` (`poetry run pytest test/test_pilot_pricecharting_scrape.py -v` from `python/`).
 
 ---
 
