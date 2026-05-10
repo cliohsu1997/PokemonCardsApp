@@ -8,8 +8,10 @@ High-level layout only. Update when folders or primary files change.
 |------|---------|
 | `streamlit_app.py` | Streamlit UI: scraping, filters, charts (starting point for SQL integration). |
 | `IMPLEMENTATION_PLAN.md` | Phase plan and status (authoritative). |
+| `docs/BEGINNER_SQL_GUIDE.md` | Concept map: SQL vs SQLite, `.sql` / `.db` / CSV, tools (`sqlite3.exe`, Python `sqlite3`). |
+| `BEGINNER_SQL_GUIDE.html` | Same guide as static HTML — open in a browser from the repo root for easier reading. |
 | `.cursor/` | **Rules:** `project-workflow.mdc`, `agent-permissions.mdc`. **Skills:** `task-management-workflow`, `agent-permissions`, `python` (Poetry-only runs). See `skills/README.md`. |
-| `data/` | Empty placeholder for datasets and imports (tracked via `.gitkeep`). |
+| `data/` | `.gitkeep` placeholder; Streamlit writes **`latest_pokemon_prices.csv`** and **`pokemon_price_history.csv`** here when scraping (local-only; not committed by default if ignored). Future SQLite schema file possible per **`IMPLEMENTATION_PLAN.md`**. |
 | `debug/` | Empty placeholder for debug logs or scratch outputs (`.gitkeep`). |
 | `output/` | Empty placeholder for exports, reports, and generated files (`.gitkeep`). |
 
