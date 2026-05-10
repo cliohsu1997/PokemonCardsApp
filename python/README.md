@@ -26,7 +26,7 @@ Do **not** put **`pyproject.toml`**, **`poetry.lock`**, **`poetry.toml`**, or **
 |------|------|
 | **`.venv/`** | Auto-created virtualenv (gitignored). |
 | **`code/`** | Application scripts. |
-| **`test/`** | **All** `pytest` tests; **`conftest.py`** puts **`code/`** on `sys.path` for imports like **`scrape`**. |
+| **`test/`** | **All** `pytest` tests; **`conftest.py`** puts **`code/`** on `sys.path` for imports like **`scrape`**. Scrape tests live under **`test/scrape/`**. |
 
 ## Setup
 

@@ -28,7 +28,8 @@ All Python commands for this app use **`poetry run`** from **`python/`** (see `.
 | `python/.venv/` | Poetry-created virtualenv (**not** committed). |
 | `python/code/` | Application scripts. |
 | `python/code/scrape/` | PriceCharting scrape (`constants`, `pricecharting`, `__init__`). |
-| `python/test/` | **All** `pytest` modules live here (`poetry run pytest test\ -v`); **`conftest.py`** adds **`python/code/`** to `sys.path` (e.g. scrape pilots in **`test_pilot_pricecharting_scrape.py`**). |
+| `python/test/` | **All** `pytest` modules (`poetry run pytest test\ -v`); **`conftest.py`** adds **`python/code/`** to `sys.path`. |
+| `python/test/scrape/` | Scrape-only tests (e.g. **`test_pilot_pricecharting_scrape.py`**). |
 
 ## Workflow and tracking (per `project-workflow.mdc`)
 
