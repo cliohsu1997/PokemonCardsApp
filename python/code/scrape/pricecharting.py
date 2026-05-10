@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from dataclasses import dataclass
 
 import pandas as pd
 import requests
@@ -10,6 +11,19 @@ import streamlit as st
 from bs4 import BeautifulSoup
 
 from scrape.constants import SEALED_NAME_PATTERN
+
+
+@dataclass(frozen=True)
+class ScrapeResult:
+    """Output of ``scrape_pricecharting_data``.
+
+    ``ok_for_history`` is True only when this was a **full** run (all non-Japanese
+    sets, no ``max_sets`` cap), the category page loaded, at least one set URL was
+    found, the per-set loop finished, and the cleaned frame has at least one row.
+    """
+
+    df: pd.DataFrame
+    ok_for_history: bool
 
 
 class _QuietProgress:
@@ -24,14 +38,14 @@ def scrape_pricecharting_data(
     max_sets: int | None = None,
     sleep_seconds: float = 0.3,
     quiet: bool = False,
-) -> pd.DataFrame:
-    """Scrape category → per-set tables; return cleaned DataFrame (same columns as before).
+) -> ScrapeResult:
+    """Scrape category → per-set tables; return cleaned data plus history eligibility flag.
 
     Parameters
     ----------
     max_sets
         If set, only scrape this many set URLs (after de-dup and Japanese filter).
-        Use for pilots/tests against the live site without walking every set.
+        Such runs are never ``ok_for_history``. Use for pilots/tests.
     sleep_seconds
         Pause between set requests (politeness). Tests may pass ``0``.
     quiet
@@ -56,7 +70,7 @@ def scrape_pricecharting_data(
         soup = BeautifulSoup(res.text, "html.parser")
     except Exception:
         _error("Error fetching category page.")
-        return pd.DataFrame()
+        return ScrapeResult(pd.DataFrame(), False)
 
     set_links = soup.select('a[href^="/console/pokemon"]')
     set_urls = list({base_url + link["href"] for link in set_links})
@@ -64,6 +78,11 @@ def scrape_pricecharting_data(
     if max_sets is not None:
         set_urls = set_urls[:max_sets]
 
+    n_planned = len(set_urls)
+    if n_planned == 0:
+        return ScrapeResult(pd.DataFrame(), False)
+
+    is_full_run = max_sets is None
     all_data: list[dict] = []
     progress = _QuietProgress() if quiet else st.progress(0)
 
@@ -108,7 +127,7 @@ def scrape_pricecharting_data(
 
     df = pd.DataFrame(all_data)
     if df.empty:
-        return df
+        return ScrapeResult(df, False)
 
     df["Card_Name_clean"] = df["Card_Name"].str.strip()
     df = df[
@@ -121,7 +140,7 @@ def scrape_pricecharting_data(
     df = df.drop(columns=["Card_Name_clean"])
 
     if df.empty:
-        return df
+        return ScrapeResult(df, False)
 
     for col in ["Ungraded_Price", "Grade_9_Price", "PSA_10_Price"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -129,4 +148,5 @@ def scrape_pricecharting_data(
     df["Deal_Value"] = df["Grade_9_Price"] - df["Ungraded_Price"]
     df["Set"] = df["Set"].str.replace("pokemon-", "", regex=False)
 
-    return df
+    ok_for_history = is_full_run and n_planned > 0 and not df.empty
+    return ScrapeResult(df, ok_for_history)

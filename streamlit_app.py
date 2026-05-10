@@ -21,13 +21,59 @@ _CODE_ROOT = Path(__file__).resolve().parent / "python" / "code"
 if str(_CODE_ROOT) not in sys.path:
     sys.path.insert(0, str(_CODE_ROOT))
 
-from scrape import SEALED_NAME_PATTERN, scrape_pricecharting_data
+from scrape import SEALED_NAME_PATTERN, ScrapeResult, scrape_pricecharting_data
 
 
 # --------------------------
 # Local data files (no cloud storage — aligns with SQLite migration in IMPLEMENTATION_PLAN.md)
 # --------------------------
 HISTORY_CSV_PATH = "data/pokemon_price_history.csv"
+LATEST_CSV_PATH = "data/latest_pokemon_prices.csv"
+
+
+def persist_scrape_output(result: ScrapeResult, today: str) -> None:
+    """Always write ``latest`` CSV. Append to ``history`` only if run is history-complete,
+    there is at least one row, and ``today`` is not already present in history."""
+    os.makedirs("data", exist_ok=True)
+    df = result.df
+    if df.empty:
+        latest_out = pd.DataFrame(
+            columns=[
+                "Set",
+                "Card_Name",
+                "Ungraded_Price",
+                "Grade_9_Price",
+                "PSA_10_Price",
+                "Image_URL",
+                "Deal_Value",
+                "Date",
+            ]
+        )
+    else:
+        latest_out = df.copy()
+        latest_out["Date"] = today
+    latest_out.to_csv(LATEST_CSV_PATH, index=False)
+
+    if not result.ok_for_history or result.df.empty:
+        return
+
+    try:
+        old = (
+            pd.read_csv(HISTORY_CSV_PATH)
+            if os.path.isfile(HISTORY_CSV_PATH)
+            else pd.DataFrame()
+        )
+    except Exception:
+        old = pd.DataFrame()
+
+    if old.empty:
+        combined = latest_out
+    elif "Date" in old.columns and today not in old["Date"].astype(str).values:
+        combined = pd.concat([old, latest_out], ignore_index=True)
+    else:
+        return
+
+    combined.to_csv(HISTORY_CSV_PATH, index=False)
 
 
 # --------------------------
@@ -154,7 +200,7 @@ st.markdown(
 # --------------------------
 @st.cache_data
 def load_data():
-    file_path = "data/latest_pokemon_prices.csv"
+    file_path = LATEST_CSV_PATH
     expected_cols = {"Set", "Card_Name", "Ungraded_Price", "Grade_9_Price", "PSA_10_Price", "Image_URL"}
 
     if not os.path.exists(file_path):
@@ -205,41 +251,24 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Show refresh button
 if st.button("Refresh Price Data"):
     with st.spinner("Scraping all Pokémon card sets (this may take up to 5 minutes)..."):
-        df_scraped = scrape_pricecharting_data()
+        today_refresh = datetime.now().strftime("%Y-%m-%d")
+        scrape_result = scrape_pricecharting_data()
+        persist_scrape_output(scrape_result, today_refresh)
 
-        if not df_scraped.empty:
-            # Add today's date column
-            today = datetime.now().strftime("%Y-%m-%d")
-            df_scraped["Date"] = today
-
-            # --------------------------
-            # Merge into local growing history CSV
-            # --------------------------
-            os.makedirs("data", exist_ok=True)
-            try:
-                if os.path.isfile(HISTORY_CSV_PATH):
-                    old = pd.read_csv(HISTORY_CSV_PATH)
-                else:
-                    old = pd.DataFrame()
-            except Exception:
-                old = pd.DataFrame()
-
-            if old.empty:
-                combined = df_scraped
-            elif today not in old["Date"].astype(str).values:
-                combined = pd.concat([old, df_scraped], ignore_index=True)
-            else:
-                combined = old
-
-            combined.to_csv(HISTORY_CSV_PATH, index=False)
-            df_scraped.to_csv("data/latest_pokemon_prices.csv", index=False)
-
-            st.success("✅ Data refreshed and saved under data/.")
-            df = df_scraped  # keep this line
-
-        else:
-            st.error("Scraping failed or returned no data.")
+        if scrape_result.df.empty:
+            st.error("Scraping failed or returned no data. Latest CSV was reset; history not changed.")
             st.stop()
+
+        if scrape_result.ok_for_history:
+            st.success(
+                "✅ Full scrape saved to latest; snapshot appended to history "
+                f"({today_refresh}) if that date was not already stored."
+            )
+        else:
+            st.success(
+                "✅ Latest prices saved under data/ (partial or capped run — "
+                "history was not updated)."
+            )
 
 # --------------------------
 # Load existing data if not refreshed
@@ -249,11 +278,10 @@ def get_valid_data(today: str):
 
     required_cols = {"Ungraded_Price", "Grade_9_Price", "PSA_10_Price"}
     if df.empty or not required_cols.issubset(df.columns):
-        df = scrape_pricecharting_data()
-        if not df.empty:
-            os.makedirs("data", exist_ok=True)
-            df.to_csv("data/latest_pokemon_prices.csv", index=False)
-        else:
+        scrape_result = scrape_pricecharting_data()
+        persist_scrape_output(scrape_result, today)
+        df = scrape_result.df
+        if df.empty:
             st.error("Scraping failed. Please try again.")
             st.stop()
 
