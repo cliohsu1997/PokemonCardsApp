@@ -7,6 +7,7 @@
 ## Completed
 
 - **initialize_project_workflow** — Workflow folders and docs added; upstream extras removed; optional header images in `streamlit_app.py`.
+- **add_python_poetry_env** — Added `python/` with Poetry (`pyproject.toml`, `poetry.lock`, `tests/`, README); mirrors sports-card-automation layout.
 
 ## Notes
 

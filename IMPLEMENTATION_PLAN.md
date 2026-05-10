@@ -1,3 +1,4 @@
+
 # Implementation plan — Pokémon card app + SQL
 
 Single source of truth for phases and status. Update this file first when phases change, then sync `progress/latest.md` and task files.
@@ -25,7 +26,7 @@ Single source of truth for phases and status. Update this file first when phases
 
 ## Phase 4 — Polish and dependencies
 
-**Status:** Not started
+**Status:** In progress
 
-- Restore a root `requirements.txt` (or `pyproject.toml`) matching `streamlit_app.py` imports.
-- Add `.gitignore` for venv, caches, and local secrets.
+- **`python/` Poetry environment** — `pyproject.toml` + `poetry.lock` aligned with upstream `requirements.txt` (including `langchain==0.0.234`). Use `poetry run` from `python/` (see `python/README.md`).
+- Add root `.gitignore` for venv, caches, and local secrets (optional root `requirements.txt` for non-Poetry users).

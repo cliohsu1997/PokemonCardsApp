@@ -10,6 +10,17 @@ High-level layout only. Update when folders or primary files change.
 | `IMPLEMENTATION_PLAN.md` | Phase plan and status (authoritative). |
 | `.cursor/` | Cursor rules and skills (task workflow). |
 
+## Python (Poetry)
+
+Same pattern as `sports-card-automation/python`: dependency lock and venv are managed from **`python/`** only.
+
+| Path | Purpose |
+|------|---------|
+| `python/pyproject.toml` | Poetry project metadata and runtime + dev dependencies. |
+| `python/poetry.lock` | Locked versions (commit this file). |
+| `python/README.md` | `poetry install` and `poetry run streamlit run ..\streamlit_app.py`. |
+| `python/tests/` | Placeholder for `pytest` (see `python/README.md`). |
+
 ## Workflow and tracking (per `project-workflow.mdc`)
 
 | Path | Purpose |
