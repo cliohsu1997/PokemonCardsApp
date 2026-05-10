@@ -1,4 +1,4 @@
-"""Ensure ``python/code`` is on ``sys.path`` so ``import scrape`` works in pytest."""
+"""Ensure ``python/code`` is on ``sys.path`` for tests under ``python/test/``."""
 
 from __future__ import annotations
 

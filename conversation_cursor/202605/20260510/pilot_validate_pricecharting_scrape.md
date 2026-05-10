@@ -12,10 +12,10 @@ Validate the refactored `python/code/scrape` package without running the full mu
 ## Rationale
 
 - Full scrape over every set is too slow for routine tests; `max_sets` caps work while still using real HTML and table parsing.
-- Tests live under **`python/test/scrape/`** next to the `scrape` package conceptually.
+- Tests live under **`python/test/`** (Poetry project root), not inside `code/scrape/`.
 
 ## Related files
 
-- `python/test/conftest.py` — `sys.path` for `scrape` imports.
-- `python/test/scrape/test_pilot_pricecharting_scrape.py` — pilot tests.
+- `python/test/conftest.py` — adds **`python/code/`** to `sys.path` for imports.
+- `python/test/test_pilot_pricecharting_scrape.py` — scrape pilot tests.
 - `python/code/scrape/pricecharting.py` — optional `max_sets`, `sleep_seconds`, `quiet` on `scrape_pricecharting_data`.
