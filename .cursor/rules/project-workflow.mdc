@@ -1,41 +1,35 @@
 ---
-description: Core project context and workflow for this repository (applies in any workspace that contains this .cursor folder)
+description: >-
+  Core project context, execution policy, folder layout, and full task workflow
+  (proposals, to-dos, summaries, updates, testing). Single combined rule for
+  this repository.
 alwaysApply: true
 ---
 
-# Cursor Rules — This Repository
+# Cursor rules — this repository
 
-**Scope:** These rules apply to **this workspace** (the folder that contains `.cursor/rules/`). They are not global to your machine. To reuse the same workflow in another repo, copy `.cursor/rules/` (and this workflow) into that project, or add equivalent instructions under **Cursor → Settings → Rules → User rules** for all projects.
+**Scope:** These rules apply to **this workspace** (the folder that contains `.cursor/rules/`). They are not global to your machine. To reuse the same workflow in another repo, copy `.cursor/rules/` into that project, or add equivalent instructions under **Cursor → Settings → Rules → User rules** for all projects.
 
-## Important: Read Project Context First
+## Read project context first
 
-At the start of **every** new conversation, you MUST read these in order:
+At the start of **every** new conversation, read these in order (task workflow detail is in later sections of **this file**):
 
-1. **`.cursor/rules/task-management-workflow.mdc`** — Task proposals, to-do lists, task summaries, progress updates, and naming conventions. **Read this file in full every time** (not only when the user mentions tasks).
-2. **`IMPLEMENTATION_PLAN.md`** — Single source of truth for high-level phases and status
-3. **`structure/latest.md`** — Current project structure and file organization
-4. **`progress/latest.md`** — Active tasks and completion status
-5. **`task_summary/YYYYMM/YYYYMMDD/[most_recent].md`** — Most recent task summary (when continuing work)
+1. **`IMPLEMENTATION_PLAN.md`** — Single source of truth for high-level phases and status
+2. **`structure/latest.md`** — Current project structure and file organization
+3. **`progress/latest.md`** — Active tasks and completion status
+4. **`task_summary/YYYYMM/YYYYMMDD/[most_recent].md`** — Most recent task summary (when continuing work)
 
-**`README.md`** (repo root) — Short project overview and pointers; optional if this rule is already loaded.
+**`README.md`** (repo root) — Short project overview and pointers; optional if missing.
 
-These files contain essential information about the project setup, workflow, and coding standards that should be followed throughout all conversations.
+## Authority, execution, and file limits
 
----
+- `IMPLEMENTATION_PLAN.md` at repo root is the **single source of truth** for high-level phases and status.
+- If a phase or subphase is added, removed, renamed, or its status changes, update `IMPLEMENTATION_PLAN.md` **first**, then synchronize task files and `progress/latest.md` / `structure/latest.md` as needed.
+- After each completed subtask, update `conversation_cursor`, `to-do`, `task_summary`, `structure/latest.md`, and `progress/latest.md` so they stay aligned with `IMPLEMENTATION_PLAN.md`.
+- The agent may create, modify, or download files without per-file confirmation when file size is **<= 200 MB**.
+- For a file expected to exceed **200 MB**, inform the user before creating or downloading.
 
-## Overview
-
-This project uses a structured workflow to track tasks and proposals systematically. For task-specific procedures, follow **task-management-workflow** (see step 1 above). Additional project rules live in `.cursor/rules/`.
-
-## Project Execution Policy
-
-- `IMPLEMENTATION_PLAN.md` is the authoritative high-level phase plan.
-- Any new phase/subphase or phase status change must be updated in `IMPLEMENTATION_PLAN.md` first, then synchronized to task/progress docs.
-- Agent may create/modify/download files without per-file confirmation when file size is **<= 200 MB**.
-- For files expected to be **> 200 MB**, agent must inform the user before proceeding.
-- After each completed subtask, update `conversation_cursor`, `to-do`, `task_summary`, `structure/latest.md`, and `progress/latest.md`.
-
-## Folder Organization
+## Folder organization
 
 ```
 conversation_cursor/     [TASK PROPOSALS]
@@ -63,20 +57,95 @@ IMPLEMENTATION_PLAN.md   [SINGLE SOURCE OF TRUTH]
                         → High-level project phases and status
 ```
 
-## Cursor rules (this repo)
+## Task workflow — structure
 
-Workflow and permissions live under `.cursor/rules/`:
+Tasks use **three synchronized files** per task, with the **same** `task_name.md` basename:
 
-- **task-management-workflow.mdc** — Task file management, updates, completion (mandatory each conversation; see step 1 above)
-- **agent-permissions.mdc** — Web search and read-only git
-- **project-workflow.mdc** — This file
-- **job_seeking_webpage.cursorrules.mdc** — Archived reference from another project (`alwaysApply: false`)
+- `conversation_cursor/YYYYMM/YYYYMMDD/task_name.md` — Technical proposals and design decisions (HOW and WHY)
+- `to-do/YYYYMM/YYYYMMDD/task_name.md` — Checklists and actionable steps (what remains to do)
+- `task_summary/YYYYMM/YYYYMMDD/task_name.md` — Objectives, deliverables, completed work, and results
 
-Optional **Cursor skills** (read when relevant) live in `.cursor/skills/` — copied from `job_seeking` on the Desktop (`compile-latex`, `polish-cv-resume`). `job_seeking_webpage` does not contain a `.cursor/skills` folder.
+**Task naming:** `task_name` must start with a verb (e.g. `implement_feature`, `refactor_pipeline`).
 
-## Remote Repositories
+## Task workflow — before creating new task files
 
-| Repository | Remote Name | Purpose | Stores |
-|------------|-------------|---------|--------|
-| **GitHub** | `origin` | Main code repository | All project files |
+Read in order:
 
+1. **README.md** — Optional if missing
+2. **IMPLEMENTATION_PLAN.md**
+3. **structure/latest.md**
+4. **progress/latest.md**
+5. **task_summary/YYYYMM/YYYYMMDD/[most_recent].md**
+
+## Task workflow — creating files
+
+### 1. Proposal
+
+**Location:** `conversation_cursor/YYYYMM/YYYYMMDD/task_name.md`
+
+- Draft technical proposal; document design decisions and approach; focus on HOW and WHY.
+
+### 2. To-do list
+
+**Location:** `to-do/YYYYMM/YYYYMMDD/task_name.md`
+
+- Checklist with checkboxes; **only uncompleted** tasks and next actions.
+
+### 3. Task summary
+
+**Location:** `task_summary/YYYYMM/YYYYMMDD/task_name.md`
+
+- Objectives and deliverables; completed work, status, findings, results; related files and dependencies.
+
+## Task workflow — content division
+
+- **TO-DO:** Only uncompleted tasks and next actions.
+- **TASK SUMMARY:** Completed work, current status, findings, results.
+- **PROPOSAL:** Technical decisions, design choices, implementation approach, architecture.
+
+## Task workflow — updates
+
+### "update"
+
+Update these three files for the task:
+
+- `to-do/YYYYMM/YYYYMMDD/task_name.md`
+- `task_summary/YYYYMM/YYYYMMDD/task_name.md`
+- `conversation_cursor/YYYYMM/YYYYMMDD/task_name.md`
+
+### "update all"
+
+Same three files, plus:
+
+- `structure/latest.md` — Only if project layout or file roles changed (**high-level, structure-only**; no low-level implementation dumps)
+- `progress/latest.md` — Active and completed task status
+- `IMPLEMENTATION_PLAN.md` — When phases, subphases, or phase status change
+
+## Task workflow — completion
+
+When a task is complete:
+
+- Finalize `conversation_cursor`, complete all items in `to-do`, close out `task_summary`
+- Move the task to the completed section in `progress/latest.md`
+- Update `structure/latest.md` if file or folder roles changed (high-level only)
+
+**IMPORTANT:** Do **not** automatically start a new task after completing one; wait for explicit user instruction.
+
+## Task workflow — testing
+
+When the user says **test** or asks for testing:
+
+1. **Run existing tests** — e.g. `python/tests/` via Poetry from `python/`
+2. **Add tests** — New files under `python/tests/`
+
+Clarify with the user which they want, or do both if appropriate.
+
+## Other rules in this repo
+
+- **`agent-permissions.mdc`** — Web search and read-only git.
+
+## Remote repositories
+
+| Repository | Remote name | Purpose |
+|------------|-------------|---------|
+| **GitHub** | `origin` | Main code repository |

@@ -8,7 +8,7 @@ High-level layout only. Update when folders or primary files change.
 |------|---------|
 | `streamlit_app.py` | Streamlit UI: scraping, filters, charts (starting point for SQL integration). |
 | `IMPLEMENTATION_PLAN.md` | Phase plan and status (authoritative). |
-| `.cursor/` | **Rules** (`rules/*.mdc`): task workflow, permissions, project workflow. **Skills** (`skills/*/SKILL.md`): copied from `C:\Users\birdy\Desktop\job_seeking\.cursor\skills` (that tree has `compile-latex`, `polish-cv-resume`; `job_seeking_webpage` has no `.cursor/skills`). Also `rules/job_seeking_webpage.cursorrules.mdc` from `job_seeking_webpage/.cursorrules`. |
+| `.cursor/` | **Rules** (`rules/*.mdc`): `project-workflow.mdc` (project + task workflow combined), `agent-permissions.mdc`. No bundled skills folder. |
 | `data/` | Empty placeholder for datasets and imports (tracked via `.gitkeep`). |
 | `debug/` | Empty placeholder for debug logs or scratch outputs (`.gitkeep`). |
 | `output/` | Empty placeholder for exports, reports, and generated files (`.gitkeep`). |
