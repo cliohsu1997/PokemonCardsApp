@@ -144,6 +144,8 @@ Clarify with the user which they want, or do both if appropriate.
 
 - **`agent-permissions.mdc`** — Web search and read-only git.
 
+Optional **Cursor skills** for this repo go under **`.cursor/skills/<name>/SKILL.md`** (see `skills/README.md`). LaTeX and CV polish skills are intentionally not bundled.
+
 ## Remote repositories
 
 | Repository | Remote name | Purpose |
