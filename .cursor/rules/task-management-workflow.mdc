@@ -1,6 +1,9 @@
 ---
-name: task-management-workflow
-description: Manages the structured task workflow for RSI project including creating proposals, to-do lists, task summaries, progress tracking, and update procedures. Use when creating new tasks, updating task status, managing task files, or when the user mentions "update", "task", "proposal", "to-do", or "task summary".
+description: >-
+  Task proposals, to-do lists, task summaries, progress tracking, and update
+  procedures. Use when creating or updating tasks, proposals, to-dos, or task
+  summaries. (Copied from former .cursor/skills/task-management-workflow/SKILL.md.)
+alwaysApply: true
 ---
 
 # Task Management Workflow
@@ -34,7 +37,7 @@ All files for the same task must use the **exact same filename** (task_name.md):
 
 Before creating any task files, read these files in order:
 
-1. **README.md** - Workflow and task management structure
+1. **README.md** - Workflow and task management structure (optional if missing)
 2. **IMPLEMENTATION_PLAN.md** - Single-source high-level phase plan
 3. **structure/latest.md** - Current project structure and file descriptions
 4. **progress/latest.md** - Active tasks and their status
@@ -97,12 +100,7 @@ When a task is complete:
 ## Testing Rule
 
 When the user says "test" or requests testing:
-1. **Run existing tests** - Execute test scripts from the `tests/` folder
-2. **Write test scripts** - Create new test files in the `tests/` folder
+1. **Run existing tests** - Execute test scripts from the `python/tests/` folder
+2. **Write test scripts** - Create new test files in the `python/tests/` folder
 
 Always clarify with the user which action is intended, or do both if appropriate.
-
-## Examples
-
-See [examples.md](examples.md) for examples.
-

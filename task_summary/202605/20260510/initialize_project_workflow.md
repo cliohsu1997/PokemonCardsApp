@@ -19,4 +19,4 @@ Complete; changes committed and pushed to `origin/main`.
 ## Related
 
 - `.cursor/rules/project-workflow.mdc`
-- `.cursor/skills/task-management-workflow/SKILL.md`
+- `.cursor/rules/task-management-workflow.mdc` (task workflow; formerly under `.cursor/skills/`)

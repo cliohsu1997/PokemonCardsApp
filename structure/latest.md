@@ -8,7 +8,10 @@ High-level layout only. Update when folders or primary files change.
 |------|---------|
 | `streamlit_app.py` | Streamlit UI: scraping, filters, charts (starting point for SQL integration). |
 | `IMPLEMENTATION_PLAN.md` | Phase plan and status (authoritative). |
-| `.cursor/` | Cursor rules and skills (task workflow). |
+| `.cursor/` | Cursor **rules** only (`rules/*.mdc`). Task workflow lives in `rules/task-management-workflow.mdc`. Includes `rules/job_seeking_webpage.cursorrules.mdc` migrated from `job_seeking_webpage/.cursorrules`. |
+| `data/` | Empty placeholder for datasets and imports (tracked via `.gitkeep`). |
+| `debug/` | Empty placeholder for debug logs or scratch outputs (`.gitkeep`). |
+| `output/` | Empty placeholder for exports, reports, and generated files (`.gitkeep`). |
 
 ## Python (Poetry)
 
