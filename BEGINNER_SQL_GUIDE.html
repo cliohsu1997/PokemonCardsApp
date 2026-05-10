@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beginner SQL guide — PokémonCardsApp</title>
+  <style>
+    :root {
+      --bg: #1a1a1e;
+      --card: #25252c;
+      --text: #e8e8ec;
+      --muted: #a0a0ab;
+      --accent: #6c9ef8;
+      --border: #3d3d47;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      padding: 2rem 1.25rem 4rem;
+      max-width: 52rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 650;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+    h2 {
+      font-size: 1.2rem;
+      margin-top: 2rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+    }
+    h3 { font-size: 1rem; margin-top: 1.25rem; color: var(--text); }
+    pre.diagram {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      color: #c8d4f0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--card); color: var(--accent); font-weight: 600; }
+    code {
+      background: var(--card);
+      padding: 0.12rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+    strong { color: #fff; }
+    .note {
+      background: var(--card);
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    .footer {
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<h1>Beginner SQL guide</h1>
+<p class="subtitle">Files, tools, and how they fit together — PokémonCardsApp (<code>IMPLEMENTATION_PLAN.md</code>). Same ideas apply to many databases; SQLite is local and file-based.</p>
+
+<h2>1. Concept map</h2>
+<p>Think of four layers:</p>
+<pre class="diagram">┌─────────────────────────────────────────────────────────────────┐
+│  YOU write SQL *text* (language)                                │
+│    • in .sql files, or in Python strings, or in a GUI           │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  DATABASE ENGINE (software program)                             │
+│    • reads/writes the .db file                                  │
+│    • parses SQL, checks rules, runs queries                     │
+│    • SQLite: often sqlite3.exe (CLI) OR Python sqlite3          │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  DATABASE FILE(S) on disk                                      │
+│    • SQLite: usually ONE file ending in .db                      │
+│    • holds tables, indexes, actual rows                         │
+└─────────────────────────────────────────────────────────────────┘
+
+Around this:
+  • CSV / Excel  → interchange formats (export/import), not the engine
+  • schema.sql   → human-readable instructions to create structure</pre>
+
+<div class="note">
+  <strong>SQLite is not a “compiler.”</strong> It is a <strong>database engine</strong> (DBMS): it understands SQL, stores data in a <code>.db</code> file, and returns results. A compiler turns source code into another form (e.g. an .exe). SQLite <em>executes</em> SQL against stored data.
+</div>
+
+<h2>2. SQL (language) vs SQLite (product)</h2>
+<table>
+  <thead><tr><th>Term</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><strong>SQL</strong></td><td>A <strong>language</strong> (Structured Query Language): <code>SELECT</code>, <code>INSERT</code>, <code>CREATE TABLE</code>. It is <strong>text</strong>. Syntax varies slightly between SQLite, PostgreSQL, MySQL.</td></tr>
+    <tr><td><strong>SQLite</strong></td><td>A specific <strong>library + tools</strong> that implements SQL for embedded/local databases — usually one <code>.db</code> file, no separate server required for basic use.</td></tr>
+  </tbody>
+</table>
+<p>You <strong>write</strong> SQL; <strong>SQLite runs it</strong> (or another engine on other projects).</p>
+
+<h2>3. File types you will see</h2>
+<table>
+  <thead><tr><th>Kind</th><th>Extension</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>Schema / script</td><td><code>.sql</code></td><td>Plain text SQL — often <code>CREATE TABLE</code>, <code>CREATE INDEX</code>, sometimes small <code>INSERT</code> seeds. Nothing runs until an engine executes it.</td></tr>
+    <tr><td>SQLite database</td><td><code>.db</code></td><td>Binary file managed by SQLite. Holds real tables and data. Do not edit in Notepad.</td></tr>
+    <tr><td>CSV</td><td><code>.csv</code></td><td>Text table for export/import (Excel, pipelines). Not the long-term “living” DB in our plan.</td></tr>
+    <tr><td>Poetry lock</td><td><code>poetry.lock</code></td><td>Not SQL — Python dependency lock for this repo.</td></tr>
+  </tbody>
+</table>
+<p>You can create tables from Python instead of <code>.sql</code>; <code>.sql</code> files are easy to read, diff in Git, and re-run.</p>
+
+<h2>4. Programs involved (SQLite on Windows)</h2>
+<table>
+  <thead><tr><th>Piece</th><th>Role</th></tr></thead>
+  <tbody>
+    <tr><td><code>sqlite3.exe</code></td><td>CLI shell: interactive SQL or <code>sqlite3 my.db &lt; script.sql</code>. Optional if you only use Python.</td></tr>
+    <tr><td>Python <code>sqlite3</code></td><td>Standard library: open <code>something.db</code>, <code>.execute("SELECT …")</code>. Typical for Streamlit.</td></tr>
+    <tr><td>SQLite inside apps</td><td>The engine embedded in Python, DB Browser for SQLite, etc.</td></tr>
+  </tbody>
+</table>
+<p>One engine; several ways in (CLI, Python, GUI).</p>
+
+<h2>5. Typical beginner workflow</h2>
+<ol>
+  <li>Design tables (columns, keys, dates).</li>
+  <li>Write <code>schema.sql</code> with <code>CREATE TABLE …</code>.</li>
+  <li>Create empty DB (Python runs script, or <code>sqlite3 data/pokemon.db &lt; data/schema.sql</code>).</li>
+  <li>Load CSV → <code>INSERT</code> or bulk load → rows live inside <code>.db</code>.</li>
+  <li>App reads DB with <code>SELECT …</code>.</li>
+</ol>
+<p>CSV stays useful for backup and Excel; <code>.db</code> is what the app queries efficiently.</p>
+
+<h2>6. Shape of the SQL language</h2>
+<table>
+  <thead><tr><th>Bucket</th><th>Examples</th><th>Role</th></tr></thead>
+  <tbody>
+    <tr><td>DDL</td><td><code>CREATE TABLE</code>, <code>ALTER</code>, <code>DROP</code>, <code>CREATE INDEX</code></td><td>Define structure.</td></tr>
+    <tr><td>DML</td><td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td><td>Change rows.</td></tr>
+    <tr><td>Query</td><td><code>SELECT … FROM … WHERE … JOIN … GROUP BY …</code></td><td>Read and summarize.</td></tr>
+    <tr><td>Transactions</td><td><code>BEGIN</code>, <code>COMMIT</code>, <code>ROLLBACK</code></td><td>Group changes safely (later).</td></tr>
+  </tbody>
+</table>
+<p><strong>CREATE</strong>, <strong>INSERT</strong>, <strong>SELECT</strong>, <strong>WHERE</strong>, <strong>JOIN</strong>, <strong>GROUP BY</strong> cover most learning projects.</p>
+
+<h2>7. This Pokémon project</h2>
+<table>
+  <thead><tr><th>Today</th><th>Phase 2+ (<code>IMPLEMENTATION_PLAN.md</code>)</th></tr></thead>
+  <tbody>
+    <tr><td>History in <code>data/pokemon_price_history.csv</code></td><td>Same facts in <code>data/*.db</code> tables</td></tr>
+    <tr><td>Pandas filters in Python</td><td>More logic in <code>SELECT</code> for practice</td></tr>
+    <tr><td>No <code>schema.sql</code> yet</td><td>Add when Phase 2 starts</td></tr>
+  </tbody>
+</table>
+
+<h2>8. Optional GUI</h2>
+<p><strong>DB Browser for SQLite</strong> — free desktop app to open a <code>.db</code>, browse tables, run <code>SELECT</code>, without Python.</p>
+
+<hr>
+
+<p><strong>One-sentence summary:</strong> SQL is what you write; the engine (SQLite) runs it; the <code>.db</code> file holds rows; <code>.sql</code> files are reusable scripts; CSV is a handy interchange format — not the authority database once you commit to SQLite.</p>
+
+<p class="footer">Source: <code>docs/BEGINNER_SQL_GUIDE.md</code> — keep both in sync when editing.</p>
+
+</body>
+</html>
