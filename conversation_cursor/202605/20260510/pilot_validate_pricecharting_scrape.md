@@ -7,15 +7,15 @@ Validate the refactored `python/code/scrape` package without running the full mu
 ## Approach
 
 1. **Constants check** — Assert `SEALED_NAME_PATTERN` is built from every `SEALED_KEYWORDS` entry (cheap regression guard).
-2. **Live category pilot** — Single `GET` to `https://www.pricecharting.com/category/pokemon-cards`, parse with the same CSS selector as production (`a[href^="/console/pokemon"]`), assert HTTP 200 and a minimum number of links. Confirms reachability and that the listing HTML shape has not obviously changed.
-3. **Mocked scrape path** — Patch `requests.get`, `time.sleep`, and Streamlit UI hooks; feed minimal HTML for one category link and one set table row. Assert DataFrame columns, numeric coercion, `Deal_Value`, and `Set` cleanup (`pokemon-` prefix stripped).
+2. **Live scrape pilot** — Call `scrape_pricecharting_data(max_sets=…, quiet=True, sleep_seconds=…)` so pytest hits the real site for a small number of sets (no mocked HTML). `quiet` avoids Streamlit UI calls outside `streamlit run`.
 
 ## Rationale
 
-- Full scrape is slow and brittle in CI; the mocked test exercises `scrape_pricecharting_data()` end-to-end for parsing and filtering.
-- The live pilot is a thin canary for site availability and selector drift.
+- Full scrape over every set is too slow for routine tests; `max_sets` caps work while still using real HTML and table parsing.
+- Tests live under **`python/test/scrape/`** next to the `scrape` package conceptually.
 
 ## Related files
 
 - `python/test/conftest.py` — `sys.path` for `scrape` imports.
-- `python/test/test_pilot_pricecharting_scrape.py` — pilot tests.
+- `python/test/scrape/test_pilot_pricecharting_scrape.py` — pilot tests.
+- `python/code/scrape/pricecharting.py` — optional `max_sets`, `sleep_seconds`, `quiet` on `scrape_pricecharting_data`.

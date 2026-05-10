@@ -8,17 +8,17 @@
 ## Deliverables
 
 - `python/test/conftest.py` — inserts `python/code` on `sys.path` for pytest.
-- `python/test/test_pilot_pricecharting_scrape.py` — three tests: sealed pattern, live category page, mocked full scrape function.
+- `python/test/scrape/test_pilot_pricecharting_scrape.py` — sealed-pattern check plus **live** `scrape_pricecharting_data(max_sets=3, quiet=True)` (no fake HTML).
+- `scrape_pricecharting_data` — keyword-only options `max_sets`, `sleep_seconds`, `quiet` for pilots and callers outside Streamlit.
 
 ## Results
 
-`poetry run pytest test/test_pilot_pricecharting_scrape.py -v` (from `python/`, 2026-05-10):
+`poetry run pytest test/scrape/test_pilot_pricecharting_scrape.py -v` (from `python/`):
 
 - `test_sealed_name_pattern_covers_keywords` — passed.
-- `test_pricecharting_pokemon_category_reachable_and_has_sets` — passed (HTTP 200, ≥3 set links).
-- `test_scrape_pricecharting_data_mocked_one_set` — passed (columns, numeric prices, `Deal_Value`, `Set` → `test-set`).
+- `test_scrape_pricecharting_real_site_limited_sets` — passed (non-empty DataFrame from real PriceCharting tables; expected columns present).
 
-**Conclusion:** Pilot successful; live category HTML still matches the expected selector; mocked path matches production parsing behavior.
+**Conclusion:** Pilot successful against the live site with a capped number of sets; no mocked HTTP responses in the test suite for this task.
 
 ## Status
 
