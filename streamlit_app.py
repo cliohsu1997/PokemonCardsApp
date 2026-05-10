@@ -293,7 +293,8 @@ def load_data():
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col1:
-    st.image("pikachu-running.png", use_container_width=True)
+    if os.path.isfile("pikachu-running.png"):
+        st.image("pikachu-running.png", use_container_width=True)
 
 with col2:
     st.markdown(
@@ -306,7 +307,8 @@ with col2:
     )
 
 with col3:
-    st.image("Pokeball-removebg-preview.png", use_container_width=True)
+    if os.path.isfile("Pokeball-removebg-preview.png"):
+        st.image("Pokeball-removebg-preview.png", use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
